@@ -1,0 +1,19 @@
+export interface Interest {
+  id: string;
+  name: string;
+  category?: string;
+  similarityScore?: number;
+}
+
+export interface User {
+  id: string;
+  name: string;
+  image: string;
+  interests: Interest[];
+}
+
+export interface UserProfile {
+  name: string;
+  image: string;
+  interests: string[];
+}

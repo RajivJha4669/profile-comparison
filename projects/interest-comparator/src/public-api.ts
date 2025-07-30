@@ -1,0 +1,10 @@
+/*
+ * Public API Surface of interest-comparator
+ */
+
+export * from './lib/interest-comparator.component';
+export * from './lib/services/similarity.service';
+export * from './lib/services/face-align.service';
+export * from './lib/services/face-alignment.service';
+export * from './lib/models/interest.model';
+export * from './lib/models/similarity-result.model';
