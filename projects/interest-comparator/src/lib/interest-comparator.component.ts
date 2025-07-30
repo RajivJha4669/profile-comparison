@@ -4,14 +4,9 @@ import { HttpClientModule } from '@angular/common/http';
 import { UserProfile } from './models/interest.model';
 import { SimilarityService } from './services/similarity.service';
 import { FaceDetectService } from './services/face-align.service';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
-
-// Import Swiper components and modules
-import Swiper from 'swiper';
 import { Navigation, Pagination } from 'swiper/modules';
-
-// Import Swiper styles
+import { Subject } from 'rxjs';
+import Swiper from 'swiper';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
@@ -26,17 +21,6 @@ import 'swiper/css/pagination';
          [class.api-error]="apiError"
          #comparatorContainer>
 
-      <!-- Mobile Status Bar -->
-      <div class="status-bar">
-        <span class="time">9:41</span>
-        <div class="status-icons">
-          <span class="signal">📶</span>
-          <span class="wifi">📶</span>
-          <span class="battery">🔋</span>
-        </div>
-      </div>
-
-      <!-- Dark Top Section (60% of screen) -->
       <div class="top-section">
         <div class="interaction-area">
           <div class="user-labels">
@@ -169,12 +153,13 @@ import 'swiper/css/pagination';
       max-width: 375px;
       height: 100vh;
       margin: 0 auto;
-      background: #000000;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       position: relative;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 
       &.loading {
         opacity: 0.7;
@@ -190,73 +175,117 @@ import 'swiper/css/pagination';
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 8px 16px;
-      background: #000000;
+      padding: 12px 20px;
+      background: rgba(0, 0, 0, 0.8);
       color: white;
       font-size: 14px;
       font-weight: 600;
       z-index: 100;
+      backdrop-filter: blur(10px);
     }
 
     .status-icons {
       display: flex;
-      gap: 4px;
+      gap: 6px;
+      align-items: center;
     }
 
     .top-section {
       flex: 0 0 60%;
-      background: #000000;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%);
       display: flex;
       align-items: center;
       justify-content: center;
       position: relative;
+      overflow: hidden;
+    }
+
+    .top-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.1)"/><circle cx="10" cy="60" r="0.5" fill="rgba(255,255,255,0.1)"/><circle cx="90" cy="40" r="0.5" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+      opacity: 0.3;
     }
 
     .interaction-area {
       text-align: center;
       color: white;
+      z-index: 2;
+      position: relative;
     }
 
     .user-labels {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 20px;
-      padding: 0 40px;
+      margin-bottom: 30px;
+      padding: 0 50px;
     }
 
     .user-label {
-      font-size: 16px;
-      font-weight: 600;
+      font-size: 18px;
+      font-weight: 700;
       color: white;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      background: rgba(255, 255, 255, 0.1);
+      padding: 8px 16px;
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
     .swipe-indicator {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 12px;
+      gap: 16px;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 16px 24px;
+      border-radius: 30px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
     .hand-icon {
-      font-size: 24px;
+      font-size: 28px;
+      animation: wave 2s ease-in-out infinite;
+    }
+
+    @keyframes wave {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(-10deg); }
+      75% { transform: rotate(10deg); }
     }
 
     .swipe-arrows {
       display: flex;
-      gap: 8px;
+      gap: 12px;
     }
 
     .arrow {
-      font-size: 18px;
+      font-size: 20px;
       color: white;
       font-weight: bold;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    .arrow:nth-child(1) { animation-delay: 0s; }
+    .arrow:nth-child(2) { animation-delay: 0.5s; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.6; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.1); }
     }
 
     .profile-comparison {
       flex: 0 0 40%;
       position: relative;
-      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+      background: rgba(255, 255, 255, 0.95);
       overflow: hidden;
+      border-top: 1px solid rgba(255, 255, 255, 0.3);
     }
 
     .background-faces {
@@ -265,72 +294,84 @@ import 'swiper/css/pagination';
       left: 0;
       right: 0;
       bottom: 0;
-      filter: blur(8px);
-      opacity: 0.3;
+      filter: blur(12px);
+      opacity: 0.2;
       z-index: 1;
     }
 
     .face {
       position: absolute;
-      width: 120px;
-      height: 120px;
+      width: 140px;
+      height: 140px;
       border-radius: 50%;
       background-size: cover;
       background-position: center;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
     }
 
     .user1-face {
-      left: 20px;
-      top: 20px;
+      left: 30px;
+      top: 30px;
+      transform: rotate(-5deg);
     }
 
     .user2-face {
-      right: 20px;
-      top: 20px;
+      right: 30px;
+      top: 30px;
+      transform: rotate(5deg);
     }
 
     /* Face Detection Results Display */
     .face-detection-results {
       position: absolute;
-      top: 10px;
-      left: 10px;
-      right: 10px;
+      top: 15px;
+      left: 15px;
+      right: 15px;
       z-index: 10;
       display: flex;
-      gap: 10px;
+      gap: 15px;
       pointer-events: none;
     }
 
     .face-result {
       flex: 1;
       position: relative;
-      max-width: 150px;
+      max-width: 160px;
     }
 
     .face-image {
       width: 100%;
       height: auto;
-      border-radius: 8px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 12px;
+      border: 3px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     }
 
     .face-box {
       position: absolute;
-      border: 2px solid #00ff00;
-      background: rgba(0, 255, 0, 0.1);
+      border: 3px solid #00ff88;
+      background: rgba(0, 255, 136, 0.15);
       pointer-events: none;
+      border-radius: 4px;
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes glow {
+      from { box-shadow: 0 0 5px rgba(0, 255, 136, 0.5); }
+      to { box-shadow: 0 0 15px rgba(0, 255, 136, 0.8); }
     }
 
     .face-label {
       position: absolute;
-      top: -20px;
+      top: -25px;
       left: 0;
-      background: #00ff00;
+      background: linear-gradient(135deg, #00ff88, #00cc6a);
       color: #000;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 10px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 11px;
       font-weight: bold;
+      box-shadow: 0 2px 8px rgba(0, 255, 136, 0.3);
     }
 
     .swiper {
@@ -344,21 +385,24 @@ import 'swiper/css/pagination';
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20px;
+      padding: 25px;
     }
 
     .comparison-container {
       display: flex;
       height: 100%;
       width: 100%;
-      gap: 20px;
+      gap: 25px;
+      align-items: center;
     }
 
     .interests-column {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 12px;
+      max-height: 100%;
+      overflow-y: auto;
     }
 
     .user1-column {
@@ -370,33 +414,49 @@ import 'swiper/css/pagination';
     }
 
     .interest-item {
-      background: rgba(255, 255, 255, 0.9);
-      padding: 8px 12px;
-      border-radius: 6px;
-      max-width: 80%;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%);
+      padding: 12px 16px;
+      border-radius: 12px;
+      max-width: 85%;
       display: flex;
       flex-direction: column;
-      gap: 4px;
-      transition: all 0.2s ease;
+      gap: 6px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(10px);
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      }
 
       &.shared-interest {
-        background: rgba(102, 126, 234, 0.2);
-        border: 1px solid rgba(102, 126, 234, 0.5);
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+        border: 2px solid rgba(102, 126, 234, 0.6);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+        animation: sharedGlow 2s ease-in-out infinite alternate;
       }
     }
 
+    @keyframes sharedGlow {
+      from { box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3); }
+      to { box-shadow: 0 8px 30px rgba(102, 126, 234, 0.5); }
+    }
+
     .interest-text {
-      font-size: 12px;
-      font-weight: 500;
-      color: #2c3e50;
+      font-size: 13px;
+      font-weight: 600;
+      color: #1a202c;
       word-wrap: break-word;
+      line-height: 1.4;
     }
 
     .interest-line {
-      height: 2px;
-      background: #e9ecef;
+      height: 3px;
+      background: linear-gradient(90deg, #e2e8f0 0%, #cbd5e0 100%);
       width: 100%;
-      border-radius: 1px;
+      border-radius: 2px;
     }
 
     .middle-section {
@@ -406,51 +466,77 @@ import 'swiper/css/pagination';
       transform: translate(-50%, -50%);
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 15px;
       z-index: 3;
     }
 
     .shared-interest-card {
-      background: rgba(255, 255, 255, 0.95);
-      padding: 12px 16px;
-      border-radius: 8px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 100%);
+      padding: 16px 20px;
+      border-radius: 16px;
       text-align: center;
-      min-width: 100px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      min-width: 120px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(15px);
+      transition: all 0.3s ease;
+
+      &:hover {
+        transform: scale(1.05);
+      }
 
       &.cyan-glow {
-        box-shadow: 0 4px 20px rgba(0, 255, 255, 0.4);
-        border: 2px solid rgba(0, 255, 255, 0.3);
+        box-shadow: 0 8px 30px rgba(0, 255, 255, 0.4);
+        border: 2px solid rgba(0, 255, 255, 0.4);
+        animation: cyanPulse 2s ease-in-out infinite alternate;
       }
 
       &.magenta-glow {
-        box-shadow: 0 4px 20px rgba(255, 0, 255, 0.4);
-        border: 2px solid rgba(255, 0, 255, 0.3);
+        box-shadow: 0 8px 30px rgba(255, 0, 255, 0.4);
+        border: 2px solid rgba(255, 0, 255, 0.4);
+        animation: magentaPulse 2s ease-in-out infinite alternate;
       }
     }
 
+    @keyframes cyanPulse {
+      from { box-shadow: 0 8px 30px rgba(0, 255, 255, 0.4); }
+      to { box-shadow: 0 12px 40px rgba(0, 255, 255, 0.6); }
+    }
+
+    @keyframes magentaPulse {
+      from { box-shadow: 0 8px 30px rgba(255, 0, 255, 0.4); }
+      to { box-shadow: 0 12px 40px rgba(255, 0, 255, 0.6); }
+    }
+
     .shared-text {
-      font-size: 14px;
-      font-weight: 600;
-      color: #2c3e50;
+      font-size: 15px;
+      font-weight: 700;
+      color: #1a202c;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     }
 
     .view-profile-btn {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
       border: none;
-      padding: 8px 16px;
-      border-radius: 16px;
-      font-size: 12px;
-      font-weight: 600;
+      padding: 12px 20px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
       cursor: pointer;
       transition: all 0.3s ease;
       margin-top: auto;
-      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+      letter-spacing: 0.5px;
 
       &:hover:not(:disabled) {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+      }
+
+      &:active {
         transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
       }
 
       &:disabled {
@@ -463,40 +549,49 @@ import 'swiper/css/pagination';
       text-align: center;
       color: white;
       width: 100%;
+      padding: 20px;
     }
 
     .additional-content h3 {
-      margin-bottom: 20px;
-      font-size: 18px;
-      font-weight: 600;
+      margin-bottom: 25px;
+      font-size: 20px;
+      font-weight: 700;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     }
 
     .additional-interests {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 12px;
       align-items: center;
     }
 
     .additional-interests .interest-item {
-      max-width: 200px;
+      max-width: 250px;
+      background: rgba(255, 255, 255, 0.95);
     }
 
     /* Swiper pagination styles */
     .swiper-pagination {
       position: absolute;
-      bottom: 10px;
+      bottom: 15px;
       left: 50%;
       transform: translateX(-50%);
     }
 
     .swiper-pagination-bullet {
-      background: rgba(255, 255, 255, 0.5);
+      background: rgba(102, 126, 234, 0.5);
       opacity: 1;
+      width: 8px;
+      height: 8px;
+      margin: 0 4px;
+      transition: all 0.3s ease;
     }
 
     .swiper-pagination-bullet-active {
       background: #667eea;
+      transform: scale(1.2);
+      box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
     }
 
     .loading-overlay {
@@ -505,31 +600,40 @@ import 'swiper/css/pagination';
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0, 0, 0, 0.8);
+      background: rgba(0, 0, 0, 0.85);
       display: flex;
       justify-content: center;
       align-items: center;
       z-index: 100;
+      backdrop-filter: blur(10px);
     }
 
     .loading-spinner {
       text-align: center;
       color: white;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 30px;
+      border-radius: 20px;
+      backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
     .spinner-ring {
-      width: 40px;
-      height: 40px;
-      border: 4px solid rgba(255, 255, 255, 0.3);
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(255, 255, 255, 0.2);
       border-top: 4px solid #667eea;
       border-radius: 50%;
       animation: spin 1s linear infinite;
-      margin: 0 auto 16px;
+      margin: 0 auto 20px;
+      box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
     }
 
     .spinner-text {
       color: white;
-      font-size: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     }
 
     @keyframes spin {
@@ -544,31 +648,41 @@ import 'swiper/css/pagination';
       }
 
       .swiper-slide {
-        padding: 16px;
+        padding: 20px;
       }
 
       .comparison-container {
-        gap: 16px;
+        gap: 20px;
       }
 
       .interest-item {
-        max-width: 85%;
+        max-width: 90%;
+        padding: 10px 14px;
       }
 
       .shared-interest-card {
-        min-width: 80px;
-        padding: 10px 12px;
+        min-width: 100px;
+        padding: 14px 16px;
       }
 
       .face-detection-results {
-        top: 5px;
-        left: 5px;
-        right: 5px;
-        gap: 5px;
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        gap: 10px;
       }
 
       .face-result {
-        max-width: 120px;
+        max-width: 140px;
+      }
+
+      .user-labels {
+        padding: 0 30px;
+      }
+
+      .user-label {
+        font-size: 16px;
+        padding: 6px 12px;
       }
     }
   `]
@@ -709,13 +823,28 @@ export class InterestComparatorComponent implements OnInit, AfterViewInit, OnDes
       // Step 3: Create additional slides for overflow content
       this.createAdditionalSlides();
 
-      // Step 4: Process face detection for both users
+      // Step 4: Process face detection for both users (non-blocking)
       this.loadingMessage = 'Detecting faces...';
       console.log('📸 Step 3: Processing face detection...');
-      await this.processFaceDetection();
 
-      // Show face detection results
-      this.showFaceDetectionResults = true;
+      // Use Promise.race to timeout face detection after 10 seconds
+      const faceDetectionPromise = this.processFaceDetection();
+      const timeoutPromise = new Promise(resolve => setTimeout(resolve, 10000));
+
+      try {
+        await Promise.race([faceDetectionPromise, timeoutPromise]);
+        console.log('✅ Face detection completed (or timed out)');
+      } catch (error) {
+        console.warn('⚠️ Face detection failed or timed out:', error);
+      }
+
+      // Show face detection results if available
+      if (this.user1Faces.length > 0 || this.user2Faces.length > 0) {
+        this.showFaceDetectionResults = true;
+        console.log('✅ Face detection results available');
+      } else {
+        console.log('⚠️ No face detection results available');
+      }
 
     } catch (error) {
       console.error('❌ Error initializing component:', error);
@@ -752,29 +881,46 @@ export class InterestComparatorComponent implements OnInit, AfterViewInit, OnDes
     try {
       console.log('🔍 Starting face detection process...');
 
-      // Process User 1 face detection
+      // Process User 1 face detection with timeout
       console.log('👤 Processing User 1 face detection:', this.user1.image);
-      const user1Result = await this.faceAlignService.detectFacesFromUrl(this.user1.image);
-      this.user1Faces = user1Result.faces || [];
-      console.log('✅ User 1 face detection result:', user1Result.success ? `${this.user1Faces.length} faces found` : user1Result.error);
-      console.log('👤 User 1 faces:', this.user1Faces);
+      try {
+        const user1Result = await Promise.race([
+          this.faceAlignService.detectFacesFromUrl(this.user1.image),
+          new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
+        ]);
+        this.user1Faces = user1Result.faces || [];
+        console.log('✅ User 1 face detection result:', user1Result.success ? `${this.user1Faces.length} faces found` : user1Result.error);
+        console.log('👤 User 1 faces:', this.user1Faces);
+      } catch (error) {
+        console.warn('❌ User 1 face detection failed:', error);
+        this.user1Faces = [];
+      }
 
-      // Process User 2 face detection
+      // Process User 2 face detection with timeout
       console.log('👤 Processing User 2 face detection:', this.user2.image);
-      const user2Result = await this.faceAlignService.detectFacesFromUrl(this.user2.image);
-      this.user2Faces = user2Result.faces || [];
-      console.log('✅ User 2 face detection result:', user2Result.success ? `${this.user2Faces.length} faces found` : user2Result.error);
-      console.log('👤 User 2 faces:', this.user2Faces);
+      try {
+        const user2Result = await Promise.race([
+          this.faceAlignService.detectFacesFromUrl(this.user2.image),
+          new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
+        ]);
+        this.user2Faces = user2Result.faces || [];
+        console.log('✅ User 2 face detection result:', user2Result.success ? `${this.user2Faces.length} faces found` : user2Result.error);
+        console.log('👤 User 2 faces:', this.user2Faces);
+      } catch (error) {
+        console.warn('❌ User 2 face detection failed:', error);
+        this.user2Faces = [];
+      }
 
       // Store face data for potential future use (eye-to-eye alignment)
-      if (user1Result.success && user2Result.success) {
+      if (this.user1Faces.length > 0 || this.user2Faces.length > 0) {
         (this.user1 as any).faceData = this.user1Faces;
         (this.user2 as any).faceData = this.user2Faces;
-        console.log('💾 Face data stored for both users');
+        console.log('💾 Face data stored for users');
       }
 
     } catch (error) {
       console.error('💥 Face detection process failed:', error);
+      // Don't throw error, just log it
     }
   }
 

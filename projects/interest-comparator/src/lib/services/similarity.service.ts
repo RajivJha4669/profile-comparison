@@ -25,13 +25,20 @@ export class SimilarityService {
     user3Interests: string[] = []
   ): Promise<SimilarityResult> {
     try {
+      console.log('🔄 Starting interest ordering with API calls...');
+
       // Combine all interests for comparison
       const allInterests = [...user1Interests, ...user2Interests, ...user3Interests];
-      const similarityMatrix = await this.buildSimilarityMatrix(allInterests);
 
-      // Order interests based on the design rules
+      // Build similarity matrix using API calls (limited to avoid too many calls)
+      console.log('📊 Building similarity matrix with API...');
+      const similarityMatrix = await this.buildSimilarityMatrixOptimized(allInterests);
+
+      // Order interests based on the design rules using API results
       const orderedUser1Interests = this.orderUser1Interests(user1Interests, user2Interests, user3Interests, allInterests, similarityMatrix);
       const orderedUser2Interests = this.orderUser2Interests(user2Interests, user1Interests, user3Interests, allInterests, similarityMatrix);
+
+      console.log('✅ Interest ordering complete using API');
 
       return {
         user1Interests,
@@ -53,8 +60,10 @@ export class SimilarityService {
     }
   }
 
-  private async buildSimilarityMatrix(interests: string[]): Promise<number[][]> {
+  private async buildSimilarityMatrixOptimized(interests: string[]): Promise<number[][]> {
     const matrix: number[][] = [];
+    const maxComparisons = 20; // Limit API calls to prevent rate limiting
+    let comparisonCount = 0;
 
     for (let i = 0; i < interests.length; i++) {
       matrix[i] = [];
@@ -64,62 +73,24 @@ export class SimilarityService {
         } else if (j < i) {
           matrix[i][j] = matrix[j][i]; // Use cached value
         } else {
-          matrix[i][j] = await this.getSimilarityScore(interests[i], interests[j]);
+          if (comparisonCount < maxComparisons) {
+            try {
+              matrix[i][j] = await this.getSimilarityScore(interests[i], interests[j]);
+              comparisonCount++;
+            } catch (error) {
+              console.warn(`API call failed for comparison ${i}-${j}, using fallback`);
+              matrix[i][j] = this.calculateFallbackSimilarity(interests[i], interests[j]);
+            }
+          } else {
+            // Use fallback for remaining comparisons
+            matrix[i][j] = this.calculateFallbackSimilarity(interests[i], interests[j]);
+          }
         }
       }
     }
 
+    console.log(`📊 Built similarity matrix with ${comparisonCount} API calls`);
     return matrix;
-  }
-
-  private async getSimilarityScore(text1: string, text2: string): Promise<number> {
-    try {
-      const headers = new HttpHeaders({
-        'X-Api-Key': this.apiKey,
-        'Content-Type': 'application/json'
-      });
-
-      const response = await this.http.post<{ similarity: number }>(
-        this.apiUrl,
-        { text_1: text1, text_2: text2 },
-        { headers }
-      ).pipe(
-        timeout(5000), // 5 second timeout
-        catchError(error => {
-          console.warn(`Similarity API error for "${text1}" vs "${text2}":`, error);
-          return of({ similarity: this.calculateFallbackSimilarity(text1, text2) });
-        })
-      ).toPromise();
-
-      return response?.similarity ?? this.calculateFallbackSimilarity(text1, text2);
-    } catch (error) {
-      console.warn(`Similarity API failed for "${text1}" vs "${text2}":`, error);
-      return this.calculateFallbackSimilarity(text1, text2);
-    }
-  }
-
-  private calculateFallbackSimilarity(text1: string, text2: string): number {
-    // Simple fallback similarity calculation based on string similarity
-    const normalized1 = text1.toLowerCase().trim();
-    const normalized2 = text2.toLowerCase().trim();
-
-    if (normalized1 === normalized2) return 1;
-
-    // Check for partial matches
-    if (normalized1.includes(normalized2) || normalized2.includes(normalized1)) {
-      return 0.7;
-    }
-
-    // Check for common words
-    const words1 = normalized1.split(/\s+/);
-    const words2 = normalized2.split(/\s+/);
-    const commonWords = words1.filter(word => words2.includes(word));
-
-    if (commonWords.length > 0) {
-      return Math.min(0.5, commonWords.length / Math.max(words1.length, words2.length));
-    }
-
-    return 0.1; // Default low similarity
   }
 
   private orderUser1Interests(
@@ -130,7 +101,7 @@ export class SimilarityService {
     matrix: number[][]
   ): string[] {
     if (matrix.length === 0) {
-      return [...user1Interests]; // Return original order if no matrix
+      return this.orderUser1InterestsFallback(user1Interests, user2Interests, user3Interests);
     }
 
     const interestScores = user1Interests.map(interest => {
@@ -184,7 +155,7 @@ export class SimilarityService {
     matrix: number[][]
   ): string[] {
     if (matrix.length === 0) {
-      return [...user2Interests]; // Return original order if no matrix
+      return this.orderUser2InterestsFallback(user2Interests, user1Interests, user3Interests);
     }
 
     const interestScores = user2Interests.map(interest => {
@@ -230,6 +201,157 @@ export class SimilarityService {
       .map(item => item.interest);
   }
 
+  private orderUser1InterestsFallback(
+    user1Interests: string[],
+    user2Interests: string[],
+    user3Interests: string[]
+  ): string[] {
+    const interestScores = user1Interests.map(interest => {
+      let totalScore = 0;
+      let scoreCount = 0;
+
+      // Rule 1: User 3's Influence - If User 3 also has that interest, put it closer to the top
+      if (user3Interests.includes(interest)) {
+        totalScore += 0.8; // High score for User 3 match
+        scoreCount++;
+      }
+
+      // Rule 2: User 1's Own Similarity - Check for similar interests within User 1
+      for (const otherInterest of user1Interests) {
+        if (otherInterest !== interest) {
+          const similarity = this.calculateFallbackSimilarity(interest, otherInterest);
+          totalScore += similarity * 0.6; // Medium weight for self-similarity
+          scoreCount++;
+        }
+      }
+
+      // Rule 3: User 1 vs User 2 Similarity - Check similarity with User 2's interests
+      for (const user2Interest of user2Interests) {
+        const similarity = this.calculateFallbackSimilarity(interest, user2Interest);
+        totalScore += similarity * 0.4; // Lower weight for cross-user similarity
+        scoreCount++;
+      }
+
+      const avgScore = scoreCount > 0 ? totalScore / scoreCount : 0;
+      return { interest, score: avgScore };
+    });
+
+    // Sort by similarity score (highest first)
+    return interestScores
+      .sort((a, b) => b.score - a.score)
+      .map(item => item.interest);
+  }
+
+  private orderUser2InterestsFallback(
+    user2Interests: string[],
+    user1Interests: string[],
+    user3Interests: string[]
+  ): string[] {
+    const interestScores = user2Interests.map(interest => {
+      let totalScore = 0;
+      let scoreCount = 0;
+
+      // Rule 1: User 3's Influence - If User 3 also has that interest, put it closer to the top
+      if (user3Interests.includes(interest)) {
+        totalScore += 0.8; // High score for User 3 match
+        scoreCount++;
+      }
+
+      // Rule 2: User 2's Own Similarity - Check for similar interests within User 2
+      for (const otherInterest of user2Interests) {
+        if (otherInterest !== interest) {
+          const similarity = this.calculateFallbackSimilarity(interest, otherInterest);
+          totalScore += similarity * 0.6; // Medium weight for self-similarity
+          scoreCount++;
+        }
+      }
+
+      // Rule 3: User 2 vs User 1 Similarity - Check similarity with User 1's interests
+      for (const user1Interest of user1Interests) {
+        const similarity = this.calculateFallbackSimilarity(interest, user1Interest);
+        totalScore += similarity * 0.4; // Lower weight for cross-user similarity
+        scoreCount++;
+      }
+
+      const avgScore = scoreCount > 0 ? totalScore / scoreCount : 0;
+      return { interest, score: avgScore };
+    });
+
+    // Sort by similarity score (highest first)
+    return interestScores
+      .sort((a, b) => b.score - a.score)
+      .map(item => item.interest);
+  }
+
+  private async buildSimilarityMatrix(interests: string[]): Promise<number[][]> {
+    const matrix: number[][] = [];
+
+    for (let i = 0; i < interests.length; i++) {
+      matrix[i] = [];
+      for (let j = 0; j < interests.length; j++) {
+        if (i === j) {
+          matrix[i][j] = 1; // Same item
+        } else if (j < i) {
+          matrix[i][j] = matrix[j][i]; // Use cached value
+        } else {
+          matrix[i][j] = await this.getSimilarityScore(interests[i], interests[j]);
+        }
+      }
+    }
+
+    return matrix;
+  }
+
+  private async getSimilarityScore(text1: string, text2: string): Promise<number> {
+    try {
+      const headers = new HttpHeaders({
+        'X-Api-Key': this.apiKey,
+        'Content-Type': 'application/json'
+      });
+
+      const response = await this.http.post<{ similarity: number }>(
+        this.apiUrl,
+        { text_1: text1, text_2: text2 },
+        { headers }
+      ).pipe(
+        timeout(3000), // 3 second timeout
+        catchError(error => {
+          console.warn(`Similarity API error for "${text1}" vs "${text2}":`, error);
+          return of({ similarity: this.calculateFallbackSimilarity(text1, text2) });
+        })
+      ).toPromise();
+
+      return response?.similarity ?? this.calculateFallbackSimilarity(text1, text2);
+    } catch (error) {
+      console.warn(`Similarity API failed for "${text1}" vs "${text2}":`, error);
+      return this.calculateFallbackSimilarity(text1, text2);
+    }
+  }
+
+  private calculateFallbackSimilarity(text1: string, text2: string): number {
+    // Simple fallback similarity calculation based on string similarity
+    const normalized1 = text1.toLowerCase().trim();
+    const normalized2 = text2.toLowerCase().trim();
+
+    if (normalized1 === normalized2) return 1;
+
+    // Check for partial matches
+    if (normalized1.includes(normalized2) || normalized2.includes(normalized1)) {
+      return 0.7;
+    }
+
+    // Check for common words
+    const words1 = normalized1.split(/\s+/);
+    const words2 = normalized2.split(/\s+/);
+    const commonWords = words1.filter(word => words2.includes(word));
+
+    if (commonWords.length > 0) {
+      return Math.min(0.5, commonWords.length / Math.max(words1.length, words2.length));
+    }
+
+    return 0.1; // Default low similarity
+  }
+
   // Method to get similarity between two specific interests
   getInterestSimilarity(interest1: string, interest2: string): Observable<number> {
     return from(this.getSimilarityScore(interest1, interest2)).pipe(
@@ -242,7 +364,7 @@ export class SimilarityService {
 
   // Method to find shared interests (similarity >= 0.8)
   findSharedInterests(user1Interests: string[], user2Interests: string[]): Observable<string[]> {
-    const shared: string[] = [];
+    console.log('🔍 Finding shared interests with API calls...');
 
     // Create an array of promises for similarity checks
     const similarityChecks = user1Interests.flatMap(interest1 =>
@@ -254,6 +376,7 @@ export class SimilarityService {
 
     return from(Promise.all(similarityChecks)).pipe(
       map(results => {
+        const shared: string[] = [];
         for (const result of results) {
           if (result.similarity >= 0.8) {
             // Use User 2's interest as the shared interest (as per design)
@@ -262,6 +385,7 @@ export class SimilarityService {
             }
           }
         }
+        console.log('✅ Shared interests found:', shared);
         return shared.slice(0, 2); // Limit to 2 shared interests for display
       }),
       catchError(error => {
