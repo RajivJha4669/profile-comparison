@@ -1,110 +1,60 @@
-import { Component, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewInit, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { UserProfile } from './models/interest.model';
-import { SimilarityService } from './services/similarity.service';
-import { FaceDetectService } from './services/face-align.service';
-import { Navigation, Pagination } from 'swiper/modules';
+import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { Subject } from 'rxjs';
 import Swiper from 'swiper';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
+import { Navigation, Pagination } from 'swiper/modules';
+import { UserProfile } from './models/interest.model';
+import { FaceDetectService } from './services/face-align.service';
+import { SimilarityService } from './services/similarity.service';
 
 @Component({
   selector: 'lib-interest-comparator',
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="matcher-home"
-         [class.loading]="isLoading"
-         [class.api-error]="apiError"
-         #comparatorContainer>
-
-      <!-- Top Header Section -->
-      <div class="top-header">
-
-        <div class="swipe-indicator">
-          <div class="swipe-arrows">
-            <span class="arrow">←</span>
-            <span class="arrow">→</span>
+    <div class="pixel-perfect-comparator" #comparatorContainer>
+      <div class="top-section">
+        <div class="swipe-indicator-row">
+          <div class="swipe-arrows">← →</div>
+          <div class="swipe-hand">
+            <svg width="40" height="40" viewBox="0 0 40 40"><path d="M20 30 Q18 28 16 30 Q14 32 12 30 Q10 28 12 26 Q14 24 16 26 Q18 28 20 26 Q22 24 24 26 Q26 28 24 30 Q22 32 20 30 Z" fill="none" stroke="#fff" stroke-width="2"/></svg>
           </div>
         </div>
-        <div class="separator-line"></div>
-      </div>
-
-      <!-- Main Content Area -->
-      <div class="main-content">
-        <div class="background-faces">
-          <div class="face user1-face" [style.background-image]="'url(' + user1.image + ')'"></div>
-          <div class="face user2-face" [style.background-image]="'url(' + user2.image + ')'"></div>
+        <div class="top-labels-row">
+          <span class="top-label left">User 1 Interests</span>
+          <span class="top-label right">User 2 Interests</span>
         </div>
-
-        <div class="swiper" #swiperContainer>
-          <div class="swiper-wrapper">
-            <!-- Main slide with three cards -->
-            <div class="swiper-slide">
-              <div class="cards-container">
-                <!-- User 1 Card (Left) -->
-                <div class="user1-card">
-                  <div class="card-content">
-                    <div *ngFor="let interest of orderedUser1Interests; trackBy: trackByInterest"
-                         class="interest-item"
-                         [class.shared-interest]="isSharedInterest(interest)">
-                      <span class="interest-text">{{ interest }}</span>
-                    </div>
-                    <div class="view-profile-btn" (click)="onViewProfile('user1')">
-                      View Profile
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Shared Interests Card (Middle) -->
-                <div class="shared-card" *ngIf="sharedInterests.length > 0">
-                  <div class="card-content">
-                    <div *ngFor="let shared of sharedInterests; let i = index"
-                         class="shared-interest-item"
-                         [class.cyan-glow]="i === 0"
-                         [class.magenta-glow]="i === 1">
-                      <span class="shared-text">{{ shared }}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- User 2 Card (Right) -->
-                <div class="user2-card">
-                  <div class="card-content">
-                    <div *ngFor="let interest of orderedUser2Interests; trackBy: trackByInterest"
-                         class="interest-item"
-                         [class.shared-interest]="isSharedInterest(interest)">
-                      <span class="interest-text">{{ interest }}</span>
-                    </div>
-                    <div class="view-profile-btn" (click)="onViewProfile('user2')">
-                      View Profile
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Additional slides for overflow content -->
-            <div class="swiper-slide" *ngFor="let slide of additionalSlides; let i = index">
-              <div class="additional-content">
-                <h3>Additional Interests</h3>
-                <div class="additional-interests">
-                  <div *ngFor="let interest of slide.interests" class="interest-item">
-                    <span class="interest-text">{{ interest }}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+      </div>
+      <div class="images-bg">
+        <div class="user-img left-img" [style.background-image]="'url(' + user1.image + ')'" ></div>
+        <div class="user-img right-img" [style.background-image]="'url(' + user2.image + ')'" ></div>
+        <div class="center-fade-overlay"></div>
+      </div>
+      <div class="main-flex-row">
+        <div class="interests-col left scrollable-col">
+          <div class="interest-item" *ngFor="let interest of orderedUser1Interests; trackBy: trackByInterest">
+            {{ interest }}
           </div>
-
-          <!-- Swiper pagination -->
-          <div class="swiper-pagination"></div>
+          <div class="view-profile-link" (click)="onViewProfile('user1')">View Profile</div>
+        </div>
+        <div class="shared-texts center-shared">
+          <ng-container *ngIf="sharedInterests.length > 0; else noShared">
+            <div *ngFor="let shared of sharedInterests">{{ shared }}</div>
+          </ng-container>
+          <ng-template #noShared>
+            <div>No shared interests</div>
+          </ng-template>
+        </div>
+        <div class="interests-col right scrollable-col">
+          <div class="interest-item" *ngFor="let interest of orderedUser2Interests; trackBy: trackByInterest">
+            {{ interest }}
+          </div>
+          <div class="view-profile-link" (click)="onViewProfile('user2')">View Profile</div>
         </div>
       </div>
-
-      <!-- Loading Overlay -->
       <div *ngIf="isLoading" class="loading-overlay">
         <div class="loading-spinner">
           <div class="spinner-ring"></div>
@@ -114,214 +64,201 @@ import 'swiper/css/pagination';
     </div>
   `,
   styles: [`
-    .matcher-home {
-      width: 100%;
-      max-width: 400px;
+    .pixel-perfect-comparator {
+      position: relative;
+      width: 100vw;
       height: 100vh;
       margin: 0 auto;
-      position: relative;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       overflow: hidden;
+      background: #181828;
       display: flex;
       flex-direction: column;
-
-      &.loading {
-        opacity: 0.7;
-        pointer-events: none;
-      }
-
-      &.api-error {
-        border: 2px solid #ff6b6b;
-      }
-    }
-
-    .top-header {
-      flex: 0 0 15%;
-      background: rgba(0, 0, 0, 0.8);
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-      z-index: 10;
-    }
-
-    .user-labels {
-      display: flex;
-      justify-content: space-between;
+      justify-content: flex-start;
       align-items: center;
     }
-
-    .user-label {
-      font-size: 16px;
-      font-weight: 600;
-      color: white;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-    }
-
-    .swipe-indicator {
-      min-height: 400px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-    }
-    .arrow {
-      font-size: 18px;
-      color: white;
-      font-weight: bold;
-    }
-    .separator-line {
-      height: 2px;
-      background: red;
+    .top-section {
       width: 100%;
-      border-radius: 1px;
-    }
-
-    .main-content {
-      flex: 1;
+      background: #232232;
+      min-height: 110px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
       position: relative;
-      overflow: hidden;
+      z-index: 3;
+      border-bottom: 2px solid #181828;
     }
-
-    .background-faces {
+    .swipe-indicator-row {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      margin-top: 10px;
+      margin-bottom: 0;
+    }
+    .swipe-arrows {
+      color: #fff;
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 2px;
+      letter-spacing: 8px;
+      text-align: center;
+    }
+    .swipe-hand {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 2px;
+    }
+    .top-labels-row {
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 0 12px 4px 12px;
+      margin-top: 2px;
+    }
+    .top-label {
+      color: #fff;
+      font-size: 12px;
+      opacity: 0.7;
+      font-weight: 400;
+    }
+    .top-label.left {
+      text-align: left;
+    }
+    .top-label.right {
+      text-align: right;
+    }
+    .images-bg {
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      top: 110px;
+      left: 0; right: 0; bottom: 0;
+      width: 100%;
+      height: calc(100% - 110px);
       z-index: 1;
+      pointer-events: none;
     }
-
-    .face {
+    .user-img {
       position: absolute;
-      width: 200px;
-      height: 100%;
+      top: 0; bottom: 0;
+      width: 60%;
       background-size: cover;
       background-position: center;
+      opacity: 0.32;
+      filter: none;
+      transition: opacity 0.3s;
     }
-
-    .user1-face {
-      left: 20px;
-      top: 20px;
+    .left-img {
+      left: -10%;
+      border-top-left-radius: 32px;
+      border-bottom-left-radius: 32px;
+      z-index: 1;
     }
-
-    .user2-face {
-      right: 20px;
-      top: 20px;
+    .right-img {
+      right: -10%;
+      border-top-right-radius: 32px;
+      border-bottom-right-radius: 32px;
+      z-index: 1;
     }
-
-    .swiper {
-      width: 100%;
-      height: 100%;
-      position: relative;
+    .center-fade-overlay {
+      position: absolute;
+      top: 0; bottom: 0;
+      left: 40%;
+      width: 20%;
       z-index: 2;
+      pointer-events: none;
+      background: linear-gradient(to right, rgba(24,24,40,0) 0%, rgba(24,24,40,0.85) 50%, rgba(24,24,40,0) 100%);
     }
-
-    .swiper-slide {
+    .main-flex-row {
+      position: relative;
+      z-index: 3;
       display: flex;
+      flex-direction: row;
+      width: 100%;
+      height: calc(100% - 110px);
       align-items: center;
       justify-content: center;
-      padding: 20px;
+      padding: 0 8px;
     }
-
-    .cards-container {
-      display: flex;
-      gap: 15px;
-      width: 100%;
-      height: 100%;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .interest-item {
-      padding: 10px 14px;
-    }
-
-    .interest-text {
-      font-size: 14px;
-      font-weight: 600;
-      color: white;
-      word-wrap: break-word;
-      line-height: 1.4;
-    }
-
-    .shared-interest-item {
-      padding: 12px 16px;
-      text-align: center;
-    }
-
-    .shared-text {
-      font-size: 16px;
-      font-weight: 700;
-      color: white;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    }
-
-    .view-profile-btn {
-      color: white;
-      border: none;
-      padding: 10px 16px;
-      font-size: 14px;
-      font-weight: 800;
-      cursor: pointer;
-      margin-top: auto;
-      text-align: center;
-
-
-
-      &:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-      }
-    }
-
-    .additional-content {
-      text-align: center;
-      color: white;
-      width: 100%;
-      padding: 20px;
-    }
-
-    .additional-content h3 {
-      margin-bottom: 20px;
-      font-size: 18px;
-      font-weight: 700;
-    }
-
-    .additional-interests {
+    .interests-col {
+      flex: 1 1 0;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      justify-content: center;
       align-items: center;
+      min-width: 0;
+      height: 80%;
+      margin-top: 12px;
+      margin-bottom: 12px;
     }
-
-    .additional-interests .interest-item {
-      max-width: 200px;
+    .scrollable-col {
+      max-height: calc(100vh - 110px - 32px);
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #444 #232232;
     }
-
-    /* Swiper pagination styles */
-    .swiper-pagination {
-      position: absolute;
-      bottom: 15px;
-      left: 50%;
-      transform: translateX(-50%);
+    .interests-col.left {
+      align-items: flex-end;
+      margin-right: 8px;
     }
-
-    // .swiper-pagination-bullet {
-    //   background: rgba(255, 255, 255, 0.5);
-    //   opacity: 1;
-    //   width: 8px;
-    //   height: 8px;
-    //   margin: 0 4px;
-    //   transition: all 0.3s ease;
-    // }
-
-    // .swiper-pagination-bullet-active {
-    //   background: #667eea;
-    //   transform: scale(1.2);
-    //   box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
-    // }
-
+    .interests-col.right {
+      align-items: flex-start;
+      margin-left: 8px;
+    }
+    .interest-item {
+      color: #fff;
+      font-size: 14px;
+      margin: 2px 0;
+      opacity: 0.95;
+      text-align: right;
+      font-weight: 500;
+      word-break: break-word;
+    }
+    .interests-col.right .interest-item {
+      text-align: left;
+    }
+    .view-profile-link {
+      color: #fff;
+      font-size: 13px;
+      margin-top: auto;
+      margin-bottom: 0;
+      cursor: pointer;
+      opacity: 0.85;
+      text-decoration: underline;
+      font-weight: 600;
+      transition: color 0.2s;
+      align-self: flex-end;
+    }
+    .interests-col.right .view-profile-link {
+      align-self: flex-start;
+    }
+    .shared-texts.center-shared {
+      flex: 0 0 38%;
+      min-width: 120px;
+      max-width: 180px;
+      min-height: 140px;
+      max-height: 220px;
+      background: none;
+      border-radius: 0;
+      box-shadow: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 8px;
+      padding: 18px 8px;
+      transform: none;
+      border: none;
+      color: #fff;
+      font-size: 17px;
+      font-weight: 600;
+      text-align: center;
+      width: 100%;
+      word-break: break-word;
+      flex-direction: column;
+      gap: 10px;
+    }
     .loading-overlay {
       position: absolute;
       top: 0;
@@ -335,7 +272,6 @@ import 'swiper/css/pagination';
       z-index: 100;
       backdrop-filter: blur(10px);
     }
-
     .loading-spinner {
       text-align: center;
       color: white;
@@ -345,7 +281,6 @@ import 'swiper/css/pagination';
       backdrop-filter: blur(15px);
       border: 1px solid rgba(255, 255, 255, 0.2);
     }
-
     .spinner-ring {
       width: 50px;
       height: 50px;
@@ -356,20 +291,16 @@ import 'swiper/css/pagination';
       margin: 0 auto 20px;
       box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
     }
-
     .spinner-text {
       color: white;
       font-size: 16px;
       font-weight: 600;
       text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     }
-
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-
-
   `]
 })
 export class InterestComparatorComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -505,6 +436,9 @@ export class InterestComparatorComponent implements OnInit, AfterViewInit, OnDes
       this.sharedInterests = await this.findSharedInterests();
       console.log('✅ Shared interests found:', this.sharedInterests);
 
+      // --- Optimization: show UI as soon as text data is ready ---
+      this.isLoading = false;
+
       // Step 3: Create additional slides for overflow content
       this.createAdditionalSlides();
 
@@ -534,13 +468,13 @@ export class InterestComparatorComponent implements OnInit, AfterViewInit, OnDes
     } catch (error) {
       console.error('❌ Error initializing component:', error);
       this.apiError = true;
+      this.isLoading = false; // Ensure loading is false on error
       // Fallback to original order
       this.orderedUser1Interests = this.user1.interests;
       this.orderedUser2Interests = this.user2.interests;
       this.sharedInterests = this.findSharedInterestsFallback();
       this.createAdditionalSlides();
     } finally {
-      this.isLoading = false;
       console.log('✅ Component initialization complete');
     }
   }

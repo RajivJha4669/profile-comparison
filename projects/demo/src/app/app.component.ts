@@ -1,9 +1,8 @@
-import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
 import {
   InterestComparatorComponent,
-  UserProfile,
-  FaceDetectService
+  UserProfile
 } from 'interest-comparator';
 import { environment } from '../environments/environment';
 
@@ -27,7 +26,7 @@ export class AppComponent implements OnInit {
 
   user2: UserProfile = {
     name: 'Sarah',
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face',
+    image: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=300&h=300&fit=crop&crop=face',
     interests: ['Reading', 'Gaming', 'Cooking', 'Travel', 'Art', 'Dancing']
   };
 
