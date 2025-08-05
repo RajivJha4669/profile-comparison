@@ -1,6 +1,55 @@
 
       <div class="mobile-demo-container">
+        <!-- Demo Mode Toggle -->
+        <div class="demo-controls">
+          <button class="toggle-btn" (click)="toggleMockMode()">
+            {{ useMockMode ? '🎭 MOCK MODE' : '🌐 API MODE' }}
+          </button>
+        </div>
+
+        <!-- Scenario Controls -->
+        <!-- <div class="scenario-controls" *ngIf="useMockMode">
+          <div class="scenario-header">
+            <h3>{{ currentScenario.name }}</h3>
+            <p>{{ currentScenario.description }}</p>
+          </div>
+          <div class="scenario-nav">
+            <button class="nav-btn" (click)="previousScenario()">← Previous</button>
+            <span class="scenario-count">{{ currentScenarioIndex + 1 }} of {{ availableScenarios.length }}</span>
+            <button class="nav-btn" (click)="nextScenario()">Next →</button>
+          </div>
+          <div class="user-preview">
+            <div class="user-card">
+              <img [src]="user1.image" [alt]="user1.name">
+              <div class="user-info">
+                <strong>{{ user1.name }}</strong>
+                <small>{{ user1.interests.length }} interests</small>
+              </div>
+            </div>
+            <div class="vs-indicator">VS</div>
+            <div class="user-card">
+              <img [src]="user2.image" [alt]="user2.name">
+              <div class="user-info">
+                <strong>{{ user2.name }}</strong>
+                <small>{{ user2.interests.length }} interests</small>
+              </div>
+            </div>
+          </div>
+        </div> -->
+
+        <!-- Mock Component (No API calls) -->
+        <app-mock-interest-comparator
+          *ngIf="useMockMode"
+          [user1]="user1"
+          [user2]="user2"
+          [user3]="user3"
+          [apiKey]="apiNinjasKey"
+          (viewProfile)="onViewProfile($event)">
+        </app-mock-interest-comparator>
+
+        <!-- Original Component (With API calls) -->
         <lib-interest-comparator
+          *ngIf="!useMockMode"
           [user1]="user1"
           [user2]="user2"
           [user3]="user3"
@@ -8,5 +57,3 @@
           (viewProfile)="onViewProfile($event)">
         </lib-interest-comparator>
       </div>
-
-

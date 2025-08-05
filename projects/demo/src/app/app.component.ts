@@ -4,6 +4,8 @@ import {
   InterestComparatorComponent,
   UserProfile
 } from 'interest-comparator';
+import { MockInterestComparatorComponent } from './components/mock-interest-comparator.component';
+import { MockDataService, DemoScenario } from './services/mock-data.service';
 import { environment } from '../environments/environment';
 
 @Component({
@@ -11,41 +13,93 @@ import { environment } from '../environments/environment';
   standalone: true,
   imports: [
     CommonModule,
-    InterestComparatorComponent
+    InterestComparatorComponent,
+    MockInterestComparatorComponent
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
-  // Sample user data for demonstration
-  user1: UserProfile = {
-    name: 'Alex',
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face',
-    interests: ['Gaming', 'Technology', 'Movies', 'Travel', 'Photography', 'Music']
-  };
+  // Current demo scenario
+  currentScenario!: DemoScenario;
 
-  user2: UserProfile = {
-    name: 'Sarah',
-    image: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=300&h=300&fit=crop&crop=face',
-    interests: ['Reading', 'Gaming', 'Cooking', 'Travel', 'Art', 'Dancing']
-  };
+  // User profiles from current scenario
+  user1!: UserProfile;
+  user2!: UserProfile;
+  user3?: UserProfile;
 
-  user3: UserProfile = {
-    name: 'Mike',
-    image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=300&fit=crop&crop=face',
-    interests: ['Sports', 'Gaming', 'Music', 'Fitness', 'Technology', 'Movies']
-  };
-
+  // Demo mode toggle
+  useMockMode = true;
   apiKeyConfigured = false;
   faceDetectionStatus = false;
-  apiNinjasKey = environment.apiNinjasKey;
+  apiNinjasKey = environment.apiNinjasKey || 'demo-key';
 
+  // Available scenarios
+  availableScenarios: DemoScenario[] = [];
+  currentScenarioIndex = 0;
+
+  constructor(private mockDataService: MockDataService) {}
 
   ngOnInit(){
+    console.log('🚀 Demo App Initialized');
+
+    // Load available scenarios
+    this.availableScenarios = this.mockDataService.getAllScenarios();
+
+    // Load default scenario
+    this.loadScenario(0);
+
+    console.log(`🎭 Mock Mode: ${this.useMockMode ? 'ENABLED' : 'DISABLED'}`);
+    console.log(`📋 Loaded scenario: ${this.currentScenario.name}`);
+  }
+
+  loadScenario(index: number): void {
+    this.currentScenarioIndex = index;
+    this.currentScenario = this.mockDataService.getScenarioByIndex(index);
+
+    this.user1 = this.currentScenario.user1;
+    this.user2 = this.currentScenario.user2;
+    this.user3 = this.currentScenario.user3;
+
+    console.log(`📋 Loaded scenario: ${this.currentScenario.name}`);
+    console.log(`👤 User 1: ${this.user1.name} (${this.user1.interests.length} interests)`);
+    console.log(`👤 User 2: ${this.user2.name} (${this.user2.interests.length} interests)`);
+    if (this.user3) {
+      console.log(`👤 User 3: ${this.user3.name} (${this.user3.interests.length} interests)`);
+    }
+  }
+
+  nextScenario(): void {
+    const nextIndex = (this.currentScenarioIndex + 1) % this.availableScenarios.length;
+    this.loadScenario(nextIndex);
+  }
+
+  previousScenario(): void {
+    const prevIndex = this.currentScenarioIndex === 0
+      ? this.availableScenarios.length - 1
+      : this.currentScenarioIndex - 1;
+    this.loadScenario(prevIndex);
   }
 
   onViewProfile(event: {user: 'user1' | 'user2'}): void {
-    console.log(`🔍 View Profile clicked for: ${event.user}`);
+    const userNames = { user1: this.user1.name, user2: this.user2.name };
+    console.log(`🔍 View Profile clicked for: ${event.user} (${userNames[event.user]})`);
+  }
+
+  toggleMockMode(): void {
+    this.useMockMode = !this.useMockMode;
+    console.log(`🎭 Mock Mode toggled: ${this.useMockMode ? 'ENABLED' : 'DISABLED'}`);
+  }
+
+  generateRandomScenario(): void {
+    const randomUsers = this.mockDataService.generateRandomUsers();
+
+    // Create a custom scenario with random users
+    this.user1 = randomUsers.user1;
+    this.user2 = randomUsers.user2;
+    this.user3 = randomUsers.user3;
+
+    console.log('🎲 Generated random scenario');
   }
 
 }
