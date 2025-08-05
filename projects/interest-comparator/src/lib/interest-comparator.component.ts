@@ -16,29 +16,18 @@ import { SimilarityService } from './services/similarity.service';
   imports: [CommonModule],
   template: `
     <div class="pixel-perfect-comparator" #comparatorContainer>
-      <div class="top-section">
-        <div class="swipe-indicator-row">
-          <div class="swipe-arrows">← →</div>
-          <div class="swipe-hand">
-            <svg width="40" height="40" viewBox="0 0 40 40"><path d="M20 30 Q18 28 16 30 Q14 32 12 30 Q10 28 12 26 Q14 24 16 26 Q18 28 20 26 Q22 24 24 26 Q26 28 24 30 Q22 32 20 30 Z" fill="none" stroke="#fff" stroke-width="2"/></svg>
-          </div>
-        </div>
-        <div class="top-labels-row">
-          <span class="top-label left">User 1 Interests</span>
-          <span class="top-label right">User 2 Interests</span>
-        </div>
-      </div>
-      <div class="images-bg">
-        <div class="user-img left-img" [style.background-image]="'url(' + user1.image + ')'" ></div>
-        <div class="user-img right-img" [style.background-image]="'url(' + user2.image + ')'" ></div>
-        <div class="center-fade-overlay"></div>
-      </div>
+       <div class="images-bg">
+        <div class="top-fade-overlay"></div>
+        <div class="user-img left-img" [style.background-image]="'url(' + user1.image + ')'"></div>
+        <div class="user-img right-img" [style.background-image]="'url(' + user2.image + ')'"></div>
+        <div class="center-fade-overlay  bottom-fade-overlay"></div>
+       </div>
       <div class="main-flex-row">
         <div class="interests-col left scrollable-col">
           <div class="interest-item" *ngFor="let interest of orderedUser1Interests; trackBy: trackByInterest">
             {{ interest }}
           </div>
-          <div class="view-profile-link" (click)="onViewProfile('user1')">View Profile</div>
+          <div class="view-profile-link" (click)="onViewProfile('user1')">View  Profile</div>
         </div>
         <div class="shared-texts center-shared">
           <ng-container *ngIf="sharedInterests.length > 0; else noShared">
@@ -52,7 +41,7 @@ import { SimilarityService } from './services/similarity.service';
           <div class="interest-item" *ngFor="let interest of orderedUser2Interests; trackBy: trackByInterest">
             {{ interest }}
           </div>
-          <div class="view-profile-link" (click)="onViewProfile('user2')">View Profile</div>
+          <div class="view-profile-link btn-2" (click)="onViewProfile('user2')">View Profile</div>
         </div>
       </div>
       <div *ngIf="isLoading" class="loading-overlay">
@@ -64,9 +53,9 @@ import { SimilarityService } from './services/similarity.service';
     </div>
   `,
   styles: [`
-    .pixel-perfect-comparator {
+     .pixel-perfect-comparator {
       position: relative;
-      width: 100vw;
+      min-width: 340px;
       height: 100vh;
       margin: 0 auto;
       overflow: hidden;
@@ -76,9 +65,12 @@ import { SimilarityService } from './services/similarity.service';
       justify-content: flex-start;
       align-items: center;
     }
+
+    /* Updated Top Section Styles */
     .top-section {
+
       width: 100%;
-      background: #232232;
+      background: #181828;
       min-height: 110px;
       display: flex;
       flex-direction: column;
@@ -86,8 +78,8 @@ import { SimilarityService } from './services/similarity.service';
       align-items: center;
       position: relative;
       z-index: 3;
-      border-bottom: 2px solid #181828;
     }
+
     .swipe-indicator-row {
       display: flex;
       flex-direction: column;
@@ -96,6 +88,7 @@ import { SimilarityService } from './services/similarity.service';
       margin-top: 10px;
       margin-bottom: 0;
     }
+
     .swipe-arrows {
       color: #fff;
       font-size: 18px;
@@ -104,13 +97,18 @@ import { SimilarityService } from './services/similarity.service';
       letter-spacing: 8px;
       text-align: center;
     }
+
     .swipe-hand {
       display: flex;
       justify-content: center;
       align-items: center;
       margin-bottom: 2px;
     }
+
     .top-labels-row {
+      position: absolute;
+      top: 350px;
+      left: 0;
       width: 100%;
       display: flex;
       flex-direction: row;
@@ -119,30 +117,51 @@ import { SimilarityService } from './services/similarity.service';
       padding: 0 12px 4px 12px;
       margin-top: 2px;
     }
+
     .top-label {
       color: #fff;
       font-size: 12px;
       opacity: 0.7;
       font-weight: 400;
     }
+
     .top-label.left {
       text-align: left;
     }
+
     .top-label.right {
       text-align: right;
     }
+
+    /* Updated Images Background */
     .images-bg {
       position: absolute;
-      top: 110px;
-      left: 0; right: 0; bottom: 0;
+      top: 350px;
+      left: 0;
+      right: 0;
+      bottom: 0;
       width: 100%;
-      height: calc(100% - 110px);
+      height: calc(100% - 400px);
       z-index: 1;
       pointer-events: none;
     }
+
+    .images-bg::before {
+      content: '';
+      position: absolute;
+      top: -20px;
+      left: 0;
+      right: 0;
+      height: 20px;
+      background: linear-gradient(to bottom, #181828, transparent);
+      z-index: 2;
+    }
+
+    /* Updated User Images */
     .user-img {
       position: absolute;
-      top: 0; bottom: 0;
+      top: 0;
+      bottom: 0;
       width: 60%;
       background-size: cover;
       background-position: center;
@@ -150,41 +169,110 @@ import { SimilarityService } from './services/similarity.service';
       filter: none;
       transition: opacity 0.3s;
     }
+
     .left-img {
       left: -10%;
-      border-top-left-radius: 32px;
       border-bottom-left-radius: 32px;
       z-index: 1;
     }
+
     .right-img {
       right: -10%;
-      border-top-right-radius: 32px;
       border-bottom-right-radius: 32px;
       z-index: 1;
     }
-    .center-fade-overlay {
+
+
+    .top-fade-overlay {
       position: absolute;
-      top: 0; bottom: 0;
-      left: 40%;
-      width: 20%;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 40%;
       z-index: 2;
       pointer-events: none;
-      background: linear-gradient(to right, rgba(24,24,40,0) 0%, rgba(24,24,40,0.85) 50%, rgba(24,24,40,0) 100%);
+      background: linear-gradient(
+        to bottom,
+      rgba(24,24,40,0.95) 0%,
+        rgba(24,24,40,0.7) 20%,
+        rgba(24,24,40,0) 100%
+      );
     }
+    .bottom-fade-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+      pointer-events: none;
+      background: linear-gradient(
+        to top,
+        rgba(24,24,40,0.95) 0%,
+        rgba(24,24,40,0.7) 20%,
+        rgba(24,24,40,0) 100%
+      );
+    }
+
+    .center-fade-overlay::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 20px;
+      background: linear-gradient(to bottom, #181828, transparent);
+    }
+
+    /* Rest of the styles remain the same */
     .main-flex-row {
-      position: relative;
+      min-width: 100%;
+      position: absolute;
+      top: 400px;
       z-index: 3;
       display: flex;
       flex-direction: row;
       width: 100%;
-      height: calc(100% - 110px);
+      height: calc(100% - 500px);
       align-items: center;
       justify-content: center;
       padding: 0 8px;
+      &::before {
+    content: '';
+    width: calc(100% - 30%);
+    position: absolute;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background: rgba(40, 73, 86, 0.50);
+    clip-path: polygon(0% 0%, 0% 0%, 300% 45%, 0% 100%);
+    border-left: 4px solid #5a3074;
+    border-bottom: 4px solid #5a3074;
+    border-top: 4px solid transparent;
+
+  }
+&::after {
+    content: "";
+    width: calc(100% - 30%);
+    position: absolute;
+    height: 100%;
+    top:-6px;
+    right: 0;
+    background: rgba(75, 56, 74, 0.50);
+    clip-path: polygon(0% 0%, 0% 0%, 300% 45%, 0% 100%);
+    transform: rotate(180deg);
+    border-right: 4px solid #5a3074;
+    border-bottom: 4px solid #5a3074;
+    border-top: 4px solid transparent;
+
+  }
     }
+
     .interests-col {
       flex: 1 1 0;
       display: flex;
+      position: relative;
+      z-index: 1;
       flex-direction: column;
       justify-content: center;
       align-items: center;
@@ -193,20 +281,24 @@ import { SimilarityService } from './services/similarity.service';
       margin-top: 12px;
       margin-bottom: 12px;
     }
+
     .scrollable-col {
       max-height: calc(100vh - 110px - 32px);
       overflow-y: auto;
       scrollbar-width: thin;
       scrollbar-color: #444 #232232;
     }
+
     .interests-col.left {
       align-items: flex-end;
       margin-right: 8px;
     }
+
     .interests-col.right {
       align-items: flex-start;
       margin-left: 8px;
     }
+
     .interest-item {
       color: #fff;
       font-size: 14px;
@@ -215,26 +307,48 @@ import { SimilarityService } from './services/similarity.service';
       text-align: right;
       font-weight: 500;
       word-break: break-word;
+      animation: fadeInUp 0.5s ease-out;
     }
+
     .interests-col.right .interest-item {
       text-align: left;
     }
+
     .view-profile-link {
-      color: #fff;
-      font-size: 13px;
+      color: #a291a0;
+      font-size: 15px;
       margin-top: auto;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
       margin-bottom: 0;
       cursor: pointer;
       opacity: 0.85;
-      text-decoration: underline;
-      font-weight: 600;
+      font-weight:800;
       transition: color 0.2s;
       align-self: flex-end;
+      width: 100%;
+
+    }
+
+    .interests-col.right .btn-2 {
+      align-self: flex-end;
+      text-align: right;
+      width: 100%;
+
     }
     .interests-col.right .view-profile-link {
       align-self: flex-start;
+
     }
+
+    .view-profile-link:hover {
+      opacity: 1;
+      color: #667eea;
+    }
+
     .shared-texts.center-shared {
+      display: flex;
+      position: relative;
+      z-index: 1;
       flex: 0 0 38%;
       min-width: 120px;
       max-width: 180px;
@@ -259,6 +373,11 @@ import { SimilarityService } from './services/similarity.service';
       flex-direction: column;
       gap: 10px;
     }
+
+    .shared-texts.center-shared > div {
+      animation: pulseGlow 2s ease-in-out infinite;
+    }
+
     .loading-overlay {
       position: absolute;
       top: 0;
@@ -272,6 +391,7 @@ import { SimilarityService } from './services/similarity.service';
       z-index: 100;
       backdrop-filter: blur(10px);
     }
+
     .loading-spinner {
       text-align: center;
       color: white;
@@ -281,6 +401,7 @@ import { SimilarityService } from './services/similarity.service';
       backdrop-filter: blur(15px);
       border: 1px solid rgba(255, 255, 255, 0.2);
     }
+
     .spinner-ring {
       width: 50px;
       height: 50px;
@@ -291,12 +412,15 @@ import { SimilarityService } from './services/similarity.service';
       margin: 0 auto 20px;
       box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
     }
+
     .spinner-text {
       color: white;
       font-size: 16px;
       font-weight: 600;
       text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      margin-bottom: 10px;
     }
+
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
