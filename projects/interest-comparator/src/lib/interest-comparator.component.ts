@@ -15,13 +15,60 @@ import { SimilarityService } from './services/similarity.service';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="pixel-perfect-comparator" #comparatorContainer>
-       <div class="images-bg">
+
+   <div class="pixel-perfect-comparator" #comparatorContainer>
+      <div class="images-bg">
         <div class="top-fade-overlay"></div>
         <div class="user-img left-img" [style.background-image]="'url(' + user1.image + ')'"></div>
         <div class="user-img right-img" [style.background-image]="'url(' + user2.image + ')'"></div>
         <div class="center-fade-overlay  bottom-fade-overlay"></div>
-       </div>
+      </div>
+
+
+      <div class="trapezoid-overlay">
+
+
+      <svg class="trapezoid-svg" viewBox="0 0 100 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="glow-teal" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    <filter id="glow-purple" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Left trapezium with rounded corners -->
+  <path class="trap-left-glow" filter="url(#glow-teal)" vector-effect="non-scaling-stroke"
+
+   d="M 0,4 L 60,17 Q 72.5,18 72.5,23 L 72.5,77 Q 72.5,82 60,83 L 0,96" fill="none" />
+  <path class="trap-left" vector-effect="non-scaling-stroke"
+   d="M 0,4 L 60,17 Q 72.5,18 72.5,23 L 72.5,77 Q 72.5,82 60,83 L 0,96" fill="none" />
+
+
+
+ <!-- Right trapezium stroke-only, mirrored to match left path style -->
+ <path class="trap-right-glow" filter="url(#glow-purple)" vector-effect="non-scaling-stroke"
+   d="M 100,4  L 40,17  Q 28,18 28,23  L 28,77  Q 28,82 40,83  L 100,96"
+   fill="none"
+ />
+
+ <path class="trap-right" vector-effect="non-scaling-stroke"
+   d="M 100,4 L 40,17 Q 28,18 28,23 L 28,77 Q 28,82 40,83 L 100,96"
+   fill="none"
+ />
+</svg>
+      </div>
+
+
       <div class="main-flex-row">
         <div class="interests-col left scrollable-col">
           <div class="interest-item" *ngFor="let interest of orderedUser1Interests; trackBy: trackByInterest">
@@ -50,9 +97,14 @@ import { SimilarityService } from './services/similarity.service';
           <div class="spinner-text">{{ loadingMessage }}</div>
         </div>
       </div>
+
     </div>
   `,
   styles: [`
+     :host {
+       font-family: var(--app-font-family, 'Segoe UI', Roboto, Arial, sans-serif);
+     }
+
      .pixel-perfect-comparator {
       position: relative;
       min-width: 340px;
@@ -237,35 +289,47 @@ import { SimilarityService } from './services/similarity.service';
       align-items: center;
       justify-content: center;
       padding: 0 8px;
-      &::before {
-    content: '';
-    width: calc(100% - 30%);
-    position: absolute;
-    height: 100%;
-    top: 0;
-    left: 0;
-    background: rgba(40, 73, 86, 0.50);
-    clip-path: polygon(0% 0%, 0% 0%, 300% 45%, 0% 100%);
-    border-left: 4px solid #5a3074;
-    border-bottom: 4px solid #5a3074;
-    border-top: 4px solid transparent;
+    }
 
-  }
-&::after {
-    content: "";
-    width: calc(100% - 30%);
-    position: absolute;
-    height: 100%;
-    top:-6px;
-    right: 0;
-    background: rgba(75, 56, 74, 0.50);
-    clip-path: polygon(0% 0%, 0% 0%, 300% 45%, 0% 100%);
-    transform: rotate(180deg);
-    border-right: 4px solid #5a3074;
-    border-bottom: 4px solid #5a3074;
-    border-top: 4px solid transparent;
+    /* Trapezium overlay positioned between images and content */
+    .trapezoid-overlay {
+      position: absolute;
+      top: 400px;
+      left: 0;
+      right: 0;
+      height: calc(100% - 500px);
+      z-index: 2; /* Above images, below content */
+      pointer-events: none;
+    }
 
-  }
+    .trapezoid-svg { width: 100%; height: 100%; display: block; }
+
+    .trap-left {
+      fill: rgba(40, 73, 86, 0.48);
+      stroke: #2ec7cc;
+      stroke-width: 2.5;
+      stroke-linejoin: round;
+    }
+    .trap-left-glow {
+      fill: rgba(40, 73, 86, 0.22);
+      stroke: #2ec7cc;
+      stroke-width: 4;
+      filter: url(#glow-teal);
+      opacity: 0.9;
+    }
+
+    .trap-right {
+      fill: rgba(131, 76, 158, 0.48);
+      stroke: #a35de4;
+      stroke-width: 2.5;
+      stroke-linejoin: round;
+    }
+    .trap-right-glow {
+      fill: rgba(131, 76, 158, 0.22);
+      stroke: #a35de4;
+      stroke-width: 4;
+      filter: url(#glow-purple);
+      opacity: 0.9;
     }
 
     .interests-col {
@@ -322,6 +386,7 @@ import { SimilarityService } from './services/similarity.service';
       margin-bottom: 0;
       cursor: pointer;
       opacity: 0.85;
+      font-family: 'Calistoga', var(--app-font-family, 'Segoe UI', Roboto, Arial, sans-serif);
       font-weight:800;
       transition: color 0.2s;
       align-self: flex-end;
@@ -420,7 +485,6 @@ import { SimilarityService } from './services/similarity.service';
       text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
       margin-bottom: 10px;
     }
-
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
