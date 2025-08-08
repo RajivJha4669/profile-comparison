@@ -104,7 +104,6 @@ export interface UserProfile {
         <div class="loading-spinner">
           <div class="spinner-ring"></div>
           <div class="spinner-text">{{ loadingMessage }}</div>
-          <div class="demo-badge">DEMO MODE</div>
         </div>
       </div>
 
