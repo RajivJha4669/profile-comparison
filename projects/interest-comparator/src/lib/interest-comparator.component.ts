@@ -53,6 +53,9 @@ import { SimilarityService } from './services/similarity.service';
     </div>
   `,
   styles: [`
+     :host {
+       font-family: var(--app-font-family, 'Segoe UI', Roboto, Arial, sans-serif);
+     }
      .pixel-perfect-comparator {
       position: relative;
       min-width: 340px;
@@ -322,6 +325,7 @@ import { SimilarityService } from './services/similarity.service';
       margin-bottom: 0;
       cursor: pointer;
       opacity: 0.85;
+      font-family: 'Calistoga', var(--app-font-family, 'Segoe UI', Roboto, Arial, sans-serif);
       font-weight:800;
       transition: color 0.2s;
       align-self: flex-end;

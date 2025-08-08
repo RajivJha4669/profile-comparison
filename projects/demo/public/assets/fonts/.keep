@@ -1,0 +1,4 @@
+/* Place your CustomFont.woff2/woff files in this directory.
+   The demo build already serves files under /assets/ via angular.json assets config. */
+
+
