@@ -29,11 +29,7 @@ export interface UserProfile {
         <div class="user-img right-img" [style.background-image]="'url(' + user2.image + ')'"></div>
         <div class="center-fade-overlay  bottom-fade-overlay"></div>
       </div>
-
-
       <div class="trapezoid-overlay">
-
-
       <svg class="trapezoid-svg" viewBox="0 0 100 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <filter id="glow-teal" x="-50%" y="-50%" width="200%" height="200%">
@@ -77,8 +73,10 @@ export interface UserProfile {
 
       <div class="main-flex-row">
         <div class="interests-col left scrollable-col">
-          <div class="interest-item" *ngFor="let interest of orderedUser1Interests; trackBy: trackByInterest">
-            {{ interest }}
+          <div class="interest-list-wrapper">
+            <div class="interest-item" *ngFor="let interest of orderedUser1Interests; trackBy: trackByInterest">
+              {{ interest }}
+            </div>
           </div>
           <div class="view-profile-link" (click)="onViewProfile('user1')">View  Profile</div>
         </div>
@@ -91,8 +89,10 @@ export interface UserProfile {
           </ng-template>
         </div>
         <div class="interests-col right scrollable-col">
-          <div class="interest-item" *ngFor="let interest of orderedUser2Interests; trackBy: trackByInterest">
-            {{ interest }}
+          <div class="interest-list-wrapper">
+            <div class="interest-item" *ngFor="let interest of orderedUser2Interests; trackBy: trackByInterest">
+              {{ interest }}
+            </div>
           </div>
           <div class="view-profile-link btn-2" (click)="onViewProfile('user2')">View Profile</div>
         </div>
@@ -117,6 +117,8 @@ export interface UserProfile {
     .pixel-perfect-comparator {
       position: relative;
       min-width: 340px;
+      width: 100%;
+      max-width: 480px;
       height: 100vh;
       margin: 0 auto;
       overflow: hidden;
@@ -350,13 +352,23 @@ export interface UserProfile {
       position: relative;
       z-index: 1;
       flex-direction: column;
-      justify-content: center;
+      justify-content: flex-start;
       align-items: center;
       min-width: 0;
       height: 80%;
       margin-top: 12px;
       margin-bottom: 12px;
 
+    }
+
+    /* Wrapper that vertically centers the interests regardless of count */
+    .interest-list-wrapper {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: inherit; /* match parent alignment (flex-end on left, flex-start on right, center on mobile) */
+      width: 100%;
+      flex: 1 1 auto; /* fill available vertical space, so inner content can center vertically */
     }
 
     .scrollable-col {
@@ -615,6 +627,25 @@ export interface UserProfile {
       50% {
         opacity: 0.8;
         text-shadow: 0 0 20px rgba(102, 126, 234, 0.8);
+      }
+    }
+
+    /* Mobile adjustments: center interest lists and ensure mobile-friendly width */
+    @media (max-width: 600px) {
+      .pixel-perfect-comparator {
+        min-width: 0;
+      }
+
+      .interests-col.left,
+      .interests-col.right {
+        align-items: center;
+        padding-left: 0;
+        padding-right: 0;
+      }
+
+      .interest-item,
+      .interests-col.right .interest-item {
+        text-align: center;
       }
     }
   `]
