@@ -16,7 +16,7 @@ import { SimilarityService } from './services/similarity.service';
   imports: [CommonModule],
   template: `
 
-   <div class="pixel-perfect-comparator" #comparatorContainer>
+<div class="pixel-perfect-comparator" #comparatorContainer>
       <div class="images-bg">
         <div class="top-fade-overlay"></div>
         <div class="user-img left-img" [style.background-image]="'url(' + user1.image + ')'"></div>
@@ -81,7 +81,7 @@ import { SimilarityService } from './services/similarity.service';
             <div *ngFor="let shared of sharedInterests">{{ shared }}</div>
           </ng-container>
           <ng-template #noShared>
-            <div>No shared interests</div>
+            <div class="no-interest">No shared interests</div>
           </ng-template>
         </div>
         <div class="interests-col right scrollable-col">
@@ -91,21 +91,24 @@ import { SimilarityService } from './services/similarity.service';
           <div class="view-profile-link btn-2" (click)="onViewProfile('user2')">View Profile</div>
         </div>
       </div>
+
       <div *ngIf="isLoading" class="loading-overlay">
         <div class="loading-spinner">
           <div class="spinner-ring"></div>
           <div class="spinner-text">{{ loadingMessage }}</div>
         </div>
       </div>
-
     </div>
   `,
   styles: [`
-     :host {
-       font-family: var(--app-font-family, 'Segoe UI', Roboto, Arial, sans-serif);
-     }
-
-     .pixel-perfect-comparator {
+      :host {
+      --accent-left: #2ec7cc;
+      --accent-right: #a35de4;
+      --text-primary: #ffffff;
+      --text-muted: #a291a0;
+      font-family: var(--app-font-family);
+    }
+    .pixel-perfect-comparator {
       position: relative;
       min-width: 340px;
       height: 100vh;
@@ -149,7 +152,10 @@ import { SimilarityService } from './services/similarity.service';
       letter-spacing: 8px;
       text-align: center;
     }
-
+    .no-interest{
+      font-size:12px
+      font-weight:700;
+    }
     .swipe-hand {
       display: flex;
       justify-content: center;
@@ -319,7 +325,7 @@ import { SimilarityService } from './services/similarity.service';
     }
 
     .trap-right {
-      fill: rgba(131, 76, 158, 0.48);
+      fill: rgba(131, 76, 158, 0.20);
       stroke: #a35de4;
       stroke-width: 2.5;
       stroke-linejoin: round;
@@ -329,7 +335,7 @@ import { SimilarityService } from './services/similarity.service';
       stroke: #a35de4;
       stroke-width: 4;
       filter: url(#glow-purple);
-      opacity: 0.9;
+      opacity: 0.1;
     }
 
     .interests-col {
@@ -344,6 +350,7 @@ import { SimilarityService } from './services/similarity.service';
       height: 80%;
       margin-top: 12px;
       margin-bottom: 12px;
+
     }
 
     .scrollable-col {
@@ -356,31 +363,43 @@ import { SimilarityService } from './services/similarity.service';
     .interests-col.left {
       align-items: flex-end;
       margin-right: 8px;
+      padding-right: 12px;
+      padding-top:20px;
+      text-shadow: 0 0 10px rgba(46, 199, 204, 0.55), 0 0 22px rgba(46, 199, 204, 0.35);
     }
 
     .interests-col.right {
       align-items: flex-start;
       margin-left: 8px;
+      padding-left: 12px;
+      padding-top:20px;
+      text-shadow: 0 0 10px rgba(46, 199, 204, 0.55), 0 0 22px rgba(46, 199, 204, 0.35);
     }
 
     .interest-item {
       color: #fff;
-      font-size: 14px;
+      font-size: 12px;
       margin: 2px 0;
       opacity: 0.95;
       text-align: right;
       font-weight: 500;
       word-break: break-word;
       animation: fadeInUp 0.5s ease-out;
+      text-shadow: 0 0 10px rgba(46, 199, 204, 0.55), 0 0 22px rgba(46, 199, 204, 0.35);
     }
 
     .interests-col.right .interest-item {
       text-align: left;
     }
 
+    .interests-col.left .interest-item {
+      text-shadow: 0 0 10px rgba(46, 199, 204, 0.55), 0 0 22px rgba(46, 199, 204, 0.35);
+    }
+
+
     .view-profile-link {
       color: #a291a0;
-      font-size: 15px;
+      font-size: 10px;
       margin-top: auto;
       text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
       margin-bottom: 0;
