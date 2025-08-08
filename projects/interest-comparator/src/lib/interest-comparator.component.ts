@@ -26,8 +26,6 @@ import { SimilarityService } from './services/similarity.service';
 
 
       <div class="trapezoid-overlay">
-
-
       <svg class="trapezoid-svg" viewBox="0 0 100 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <filter id="glow-teal" x="-50%" y="-50%" width="200%" height="200%">
@@ -65,15 +63,17 @@ import { SimilarityService } from './services/similarity.service';
    d="M 100,4 L 40,17 Q 28,18 28,23 L 28,77 Q 28,82 40,83 L 100,96"
    fill="none"
  />
-</svg>
+      </svg>
       </div>
 
 
       <div class="main-flex-row">
         <div class="interests-col left scrollable-col">
+        <div class="interest-list-wrapper">
           <div class="interest-item" *ngFor="let interest of orderedUser1Interests; trackBy: trackByInterest">
             {{ interest }}
           </div>
+        </div>
           <div class="view-profile-link" (click)="onViewProfile('user1')">View  Profile</div>
         </div>
         <div class="shared-texts center-shared">
@@ -85,8 +85,10 @@ import { SimilarityService } from './services/similarity.service';
           </ng-template>
         </div>
         <div class="interests-col right scrollable-col">
+          <div class="interest-list-wrapper">
           <div class="interest-item" *ngFor="let interest of orderedUser2Interests; trackBy: trackByInterest">
             {{ interest }}
+          </div>
           </div>
           <div class="view-profile-link btn-2" (click)="onViewProfile('user2')">View Profile</div>
         </div>
@@ -111,6 +113,8 @@ import { SimilarityService } from './services/similarity.service';
     .pixel-perfect-comparator {
       position: relative;
       min-width: 340px;
+      width: 100%;
+      max-width: 480px;
       height: 100vh;
       margin: 0 auto;
       overflow: hidden;
@@ -344,7 +348,7 @@ import { SimilarityService } from './services/similarity.service';
       position: relative;
       z-index: 1;
       flex-direction: column;
-      justify-content: center;
+      justify-content: flex-start;
       align-items: center;
       min-width: 0;
       height: 80%;
@@ -352,6 +356,36 @@ import { SimilarityService } from './services/similarity.service';
       margin-bottom: 12px;
 
     }
+
+    .interest-list-wrapper {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: inherit; /* match parent alignment (flex-end on left, flex-start on right, center on mobile) */
+      width: 100%;
+      height: 100%;
+    }
+
+
+    @media (max-width: 600px) {
+      .pixel-perfect-comparator {
+        min-width: 0;
+      }
+
+      .interests-col.left,
+      .interests-col.right {
+        align-items: center;
+        padding-left: 0;
+        padding-right: 0;
+      }
+
+      .interest-item,
+      .interests-col.right .interest-item {
+        text-align: center;
+      }
+    }
+
+
 
     .scrollable-col {
       max-height: calc(100vh - 110px - 32px);
